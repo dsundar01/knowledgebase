@@ -41,6 +41,7 @@
     - [`obj.join()`](#objjoin)
   - [Thread Yield (Giveup CPU for another thread)](#thread-yield-giveup-cpu-for-another-thread)
     - [`obj.yield()`](#objyield)
+    - [`join()` vs `yield()`](#join-vs-yield)
   - [Concurrency Problems](#concurrency-problems)
     - [Deadlock](#deadlock)
     - [Stravation](#stravation)
@@ -535,11 +536,59 @@ public class YieldExample {
 }
 ```
 
+### `join()` vs `yield()`
+
+| Feature      | `join()`                                                  | `yield()`                                                                               |
+| :----------- | :-------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| **Purpose**  | Allows one thread to wait for another thread's completion | Hint to thread scheduler that the current thread is willing to pause and let others run |
+| **Behavior** | "Stick with me until I'm done"                            | "I will step aside"                                                                     |
+| **Usage**    | Use when you want to ensure strict ordering               | Use for voluntary pauses to give other equal-priority threads a turn                    |
+
 ## Concurrency Problems
 
 ### Deadlock
 
+![Alt Text](./assests/threads/deadlock.png)
+
+**The Root Cause: Inconsistent Lock Ordering**
+
+- The core issue isn't necessarily that they are processing the same order (order_id = 100), but that there is no standardized lock order:
+
+- Transaction A's Order: Locks payments first, then tries to lock orders second.
+
+- Transaction B's Order: Locks orders first, then tries to lock payments second.
+
 **Coffman's Conditions**
+
+- They define the necessary and sufficient conditions for a deadlock to happen.
+- All 4 conditions MUST exist at the same time for a deadlock to even be possible.
+- If you break or eliminate just one of these 4 conditions in your code architecture, a deadlock becomes **mathematically impossible.**
+
+**4 Coffman Conditions**
+
+1. Mutual Exclusion: Resources cannot be shared; only one thread holds a resource at a time.
+2. Hold and Wait: A thread holding a resource is allowed to request and wait for additional resources.
+3. No Preemption: A resource cannot be forcibly taken away from a thread holding it; the thread must release it voluntarily.
+4. Circular Wait: A closed chain of threads exists where Thread 1 waits for Thread 2, Thread 2 waits for Thread 3... and Thread $N$ waits for Thread 1.
+
+**How Developers Prevent Deadlocks**
+
+Since all 4 conditions must exist together for a deadlock to happen, you only need to break one:
+
+1. Prevent Circular Wait (Most Common): Always acquire locks in a strict, uniform order (e.g., always lock Resource A before Resource B everywhere in your codebase).
+
+2. Prevent Hold & Wait: Acquire all required locks at once before starting the task, or release held locks before requesting new ones.
+
+3. Prevent No Preemption: Use timeout-based locking mechanisms like ReentrantLock.tryLock(timeout) instead of infinite block locks (synchronized). If a thread can't get the next lock, it drops its current locks and tries again later.
+
+<details>
+<summary> Byte Byte Go </summary>
+
+![Alt Text](./assests/threads/bytedeadlock.png)
+
+</details>
+
+---
 
 ### Stravation
 
