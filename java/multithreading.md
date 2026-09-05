@@ -1,92 +1,58 @@
 # Mulithreading
 
-- [Thread Basics](#thread-basics)
-  - [Thread States](#thread-states)
-    - [NEW](#new)
-    - [RUNNABLE](#runnable)
-    - [BLOCKED](#blocked)
-    - [WAITING](#waiting)
-    - [TIMED_WAITING](#timed-waiting)
-    - [TERMINATED](#terminated)
-  - [run() vs start()](#run-vs-start)
+- [Mulithreading](#mulithreading)
+  - [Concurrency \& Parallelism](#concurrency--parallelism)
+    - [Concurrency (Structure of Program)](#concurrency-structure-of-program)
+    - [Parallelism (Hardware Configuration)](#parallelism-hardware-configuration)
+    - [Concurrency Vs Parallelism](#concurrency-vs-parallelism)
+    - [Rob Pike's Definition](#rob-pikes-definition)
+    - [Core Relationship](#core-relationship)
+    - [Common Misconceptions](#common-misconceptions)
+    - [Designing for Concurrency](#designing-for-concurrency)
+    - [Consider the Workload Type](#consider-the-workload-type)
+  - [Thread Vs Process](#thread-vs-process)
+  - [Whole Picture](#whole-picture)
+  - [Thread Basics](#thread-basics)
+    - [Thread Creation in Java](#thread-creation-in-java)
+    - [Thread Lifecyle \& States](#thread-lifecyle--states)
   - [Thread Priority](#thread-priority)
   - [Daemon Thread](#daemon-thread)
-  - [ThreadLocal](#threadlocal)
-- [Synchronization & Locks](#synchronization--locks)
-  - [Race Condition](#race-condition)
-  - [synchronized](#synchronized)
-  - [Intrinsic Locks & Object Monitors](#intrinsic-locks--object-monitors)
-  - [Reentrancy](#reentrancy)
-  - [Atomicity](#atomicity)
-  - [Visibility](#visibility)
+  - [Synchronization \& Locks](#synchronization--locks)
+    - [Race Condition](#race-condition)
+    - [`synchronized` Keyword](#synchronized-keyword)
+    - [Reetrancy in synchronized](#reetrancy-in-synchronized)
+    - [Intrinsic Locks and Object Monitors](#intrinsic-locks-and-object-monitors)
+  - [Thread Coordination](#thread-coordination)
+    - [Atomicity](#atomicity)
+    - [Visibility](#visibility)
+    - [Volatile keyword](#volatile-keyword)
   - [Happens-Before Relationship](#happens-before-relationship)
-  - [Java Memory Model](#java-memory-model)
-- [Thread Coordination](#thread-coordination)
-  - [wait()](#wait)
-  - [notify()](#notify)
-  - [notifyAll()](#notifyall)
-  - [Spurious Wakeups](#spurious-wakeups)
-  - [sleep() vs wait()](#sleep-vs-wait)
-  - [join() vs yield()](#join-vs-yield)
-  - [Condition](#condition)
-- [Concurrency Problems](#concurrency-problems)
-  - [Deadlock](#deadlock)
-    - [Coffman's Conditions](#coffmans-conditions)
-  - [Starvation](#starvation)
-  - [Livelock](#livelock)
-  - [Thread Safety](#thread-safety)
-- [Java Locks](#java-locks)
-  - [ReentrantLock](#reentrantlock)
-  - [ReentrantReadWriteLock](#reentrantreadwritelock)
-  - [Condition](#condition-1)
-  - [Lock vs synchronized](#lock-vs-synchronized)
-- [Synchronization Utilities](#synchronization-utilities)
-  - [Semaphore](#semaphore)
-  - [CountDownLatch](#countdownlatch)
-  - [CyclicBarrier](#cyclicbarrier)
-  - [Phaser](#phaser)
-  - [Exchanger](#exchanger)
-- [Atomic & Lock-Free Programming](#atomic--lock-free-programming)
-  - [AtomicInteger](#atomicinteger)
-  - [AtomicLong](#atomiclong)
-  - [AtomicReference](#atomicreference)
-  - [CAS](#cas)
-  - [compareAndSet()](#compareandset)
-  - [volatile + CAS](#volatile--cas)
-  - [ABA Problem](#aba-problem)
-- [Executor Framework](#executor-framework)
-  - [Executor](#executor)
-  - [ExecutorService](#executorservice)
-  - [ThreadPoolExecutor](#threadpoolexecutor)
-    - [Core Pool Size](#core-pool-size)
-    - [Maximum Pool Size](#maximum-pool-size)
-    - [Work Queue](#work-queue)
-    - [Keep Alive](#keep-alive)
-    - [Rejection Policies](#rejection-policies)
-  - [FixedThreadPool](#fixedthreadpool)
-  - [CachedThreadPool](#cachedthreadpool)
-  - [ScheduledExecutorService](#scheduledexecutorservice)
-  - [shutdown() vs shutdownNow()](#shutdown-vs-shutdownnow)
-- [Callable & Future](#callable--future)
-  - [Runnable vs Callable](#runnable-vs-callable)
-  - [Future](#future)
-  - [CompletableFuture](#completablefuture)
-    - [thenApply()](#thenapply)
-    - [thenCompose()](#thencompose)
-    - [thenCombine()](#thencombine)
-    - [exceptionally()](#exceptionally)
-    - [allOf() vs anyOf()](#allof-vs-anyof)
-- [ForkJoin Framework](#forkjoin-framework)
-  - [ForkJoinPool](#forkjoinpool)
-  - [Work Stealing](#work-stealing)
-  - [RecursiveTask](#recursivetask)
-  - [RecursiveAction](#recursiveaction)
-- [Modern Java Concurrency](#modern-java-concurrency)
-  - [Virtual Threads](#virtual-threads)
-  - [Platform Threads vs Virtual Threads](#platform-threads-vs-virtual-threads)
-  - [Executors.newVirtualThreadPerTaskExecutor()](#executorsnewvirtualthreadpertaskexecutor)
-  - [Virtual Thread Pinning](#virtual-thread-pinning)
-  - [When NOT to Use Virtual Threads](#when-not-to-use-virtual-threads)
+    - [How to establish happens-before relation?](#how-to-establish-happens-before-relation)
+    - [Java Memory Model](#java-memory-model)
+    - [So what is Java Memory Model?](#so-what-is-java-memory-model)
+    - [Summary](#summary)
+  - [Thread Coordination](#thread-coordination-1)
+    - [`obj.wait()` `obj.notify()` `obj.notifyAll()`](#objwait-objnotify-objnotifyall)
+    - [Spurious Wakeups](#spurious-wakeups)
+    - [`obj.sleep()`](#objsleep)
+    - [`sleep()` vs `wait()`](#sleep-vs-wait)
+  - [Thread Interruption](#thread-interruption)
+  - [Thread Join (Wait for another thread)](#thread-join-wait-for-another-thread)
+    - [`obj.join()`](#objjoin)
+  - [Thread Yield (Giveup CPU for another thread)](#thread-yield-giveup-cpu-for-another-thread)
+    - [`obj.yield()`](#objyield)
+  - [Concurrency Problems](#concurrency-problems)
+    - [Deadlock](#deadlock)
+    - [Stravation](#stravation)
+    - [Livelock](#livelock)
+    - [ThreadSafe](#threadsafe)
+    - [ThreadLocal](#threadlocal)
+  - [Java Locks](#java-locks)
+  - [Synchronization Utilities](#synchronization-utilities)
+  - [Atomic \& Lock-Free Programming](#atomic--lock-free-programming)
+  - [Callable \& Future](#callable--future)
+  - [ForkJoin Framework](#forkjoin-framework)
+  - [Modern Java Concurrency](#modern-java-concurrency)
 
 ## Concurrency & Parallelism
 
@@ -197,15 +163,391 @@ Different workloads benefit from different approaches.
 
 ## Thread Vs Process
 
+- Process is an **instance of a program** with its own address space, stack and heap. A process might have multiple threads within but it will at least have one thread.
+- All the **threads of a process will have individual stacks but they will share the heap.**
+  > > Java is Process which have heap memory and threads share it in common.
+- If a process has only one thread it can only use one core. Most modern CPUs have 8 to 64 cores – so, if you do multithreading – each of those threads can run on multiple cores and hence take advantage of more resources and the program can be efficient.
+
+![Alt Text](./assests/threads/process.png)
+
+## Whole Picture
+
+> > JVM is one of the process, other process can be Posgres, RabbitMQ, Chrome Etc..
+> > Each process designated allocated memeory and os thread scheduler decides which one to run in processor.
+
+![Alt Text](./assests/threads/system-jvm.png)
+
 ## Thread Basics
+
+### Thread Creation in Java
+
+- extend `Thread` class and override `run()` method. &harr; Creating Worker
+- implement `Runnable` and create a task by implementing `run()` and handover to `Thread` class. &harr; Creating Task.
+
+```java
+Thread t = new Thread(() -> System.out.println("Lambda thread running"));
+t.start();
+```
+
+- `t.start()`
+  - registers thread with JVM scheduler, low level activities like native OS thread creation, call stack allocation etc. and creates new thread which will internally calls run() method
+  - a thread can be only used once i.e cannot call `t.start()` method again.
+
+### Thread Lifecyle & States
+
+> > Each State of threads tells you what going inside JVM.
+
+![Alt Text](./assests/threads/threadcycle.png)
+
+1. `NEW` - **Thread object has been created in heap**, but .start() has not been called.
+2. `RUNNABLE` - after `start()`, thread ready to run
+3. `RUNNING` - thread actually executing code in CPU. (CPU switch between runnable and running based on its available resource, priority of other process, concurrency)
+4. `WAITING` - indefinite waiting untill another thread notifies
+5. `TIMED_WAITING` - wait for fixed amount of time (sleep)
+6. `BLOCKED` - when thread tries to enter synchronized method or block but another thread already inside, then thread gets **blocked state until the lock is free.**
+7. `TERMINATED` - thread finished execution, cannot be restarted.
+
+## Thread Priority
+
+- `t.setPriority(1-10)` Higher priority thread **gets more CPU cycles (time)**
+- hint to JVM and OS (not guranteed), so based idea to rely on. (1 : lowest / 10: Highest Priority)
+- Because **OS schedulers vary across operating systems** and can ignore or override thread priorities, you should never rely on Thread.setPriority() for program correctness or precise execution timing.
+- Instead, **rely on deterministic synchronization and concurrency primitives provided by java.util.concurrent.**
+
+## Daemon Thread
+
+- backgroung helper thread for user threads. E.g. Garbage Collector is Daemon thread.
+- When all user threads finish, JVM will exist even if daemon thread are still running.
+- `t.setDaemon(true)` : should be set before calling start()
 
 ## Synchronization & Locks
 
+### Race Condition
+
+- two or more threads trying to acesss and**modify shared data at same time.**
+- **results depend on timing of thread execution** which will produce **unpredictable bugs** which are hard to reproduce.
+
+  > > Fix : Synchronization
+
+### `synchronized` Keyword
+
+- every object have monitor lock (since each object is a resource which have data and functions that do some thing) which synchronized keyword acquires that lock before entering and release it when existing.
+- other threads will be in blocked state until current thread releases the lock.
+- prevents data inconsistency but reduce performance due contention (fighting to claim lock).
+- Avoid over synchronization can risk bottle neck and even deadlock.
+- Types
+  - synchronized instance method (object lock)
+  - synchronized static method (class lock which is in class meta data)
+  - synchronized block with this or dedicated lock object since everybody can take shared object and come for the resource.
+
+```java
+// Demonstration of using a Private Dedicated Lock object vs. Public/This locking
+
+public class Counter {
+    private int count = 0;
+
+    /*
+     * ISSUE WITH "synchronized(this)" OR SYNCHRONIZED METHODS:
+     * If you write `synchronized(this)`, any external code holding a reference
+     * to `counter` can also execute `synchronized(counter)`.
+     * An external caller could accidentally or maliciously acquire this lock
+     * and block `increment()` from executing, causing a deadlock or performance bottleneck.
+     *
+     * SOLUTION - PRIVATE DEDICATED LOCK:
+     * We create an internal, private lock object.
+     * Because it is 'private', external code CANNOT see or acquire this lock.
+     * Because it is 'final', the lock reference cannot accidentally be changed.
+     */
+    private final Object lock = new Object();
+
+    public void increment() {
+        // Only internal methods inside Counter can synchronize on 'lock'
+        synchronized (lock) {
+            count++; // Thread-safe state mutation
+        }
+    }
+
+    public int getCount() {
+        // Read operations should also use the same private lock for visual consistency
+        synchronized (lock) {
+            return count;
+        }
+    }
+}
+```
+
+### Reetrancy in synchronized
+
+- synchronized keyword in reetrant, once acquired it can access other locked method otherwise it will become self deadlock as waiting for a lock which it already has.
+
+### Intrinsic Locks and Object Monitors
+
+- every Object hide inside intrinstic lock (monitor lock), threads must acquire or wait until other threads release.
+- Intrinsic Locks comes with monitor mechanism that allow threads to communicate
+  - `wait()` - release lock and waiting for another thread signal to wakeup.
+  - `notify()` or `notifyAll()` - wakeup waiting thread.
+
+```java
+public class QuickWaitNotify {
+    private static final Object lock = new Object();
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread worker = new Thread(() -> {
+            synchronized (lock) {
+              //enter wait state on same object
+                try { lock.wait(); } catch (InterruptedException e) { return; }
+                System.out.println("Worker thread resumed!");
+            }
+        });
+        worker.start();
+        Thread.sleep(500); // Wait for worker to enter wait state
+        synchronized (lock) { lock.notify(); } // Signal worker to wake up on same object
+    }
+}
+```
+
+![Alt Text](./assests/threads/monitor.png)
+
 ## Thread Coordination
+
+### Atomicity
+
+- threads should be able to complete the update fully or fail it completely (no partial update)
+
+> > Fix : Synchrnosiation or AtomicInteger to avoud read write cycle
+
+### Visibility
+
+- Other threads should see the latest value and not cached value
+
+> > Fix : Volatile keyword
+
+- `synchronized` Keyword solve both when same lock is being used by other thread which wants see latest value.`synchronized` flushed data from cache to main memeory
+
+### Volatile keyword
+
+- must always read and write to main memory but not atomic writes
+- volatile doesnot have any lock but synchronized is heavier
+
+**Usecases**
+
+1. Volatile : Flags, Static Variables, Simple Read/Write Sharing
+2. Synchronized : Counter, Collections or Multistep logic
 
 ## Happens-Before Relationship
 
+> > Happens-before defines a partial ordering on all actions within the program
+
+- Happens-before relationship is a guarantee provided by Java that action performed by one thread is visible to another action in different thread.
+- **Happens-before defines a partial ordering on all actions within the program. T**o guarantee that the thread executing action Y can see the results of action X (whether or not X and Y occur in different threads), there must be a happens-before relationship between X and Y.
+- In the absence of a happens-before ordering between two operations, the **JVM is free to reorder** them as it wants (JIT compiler optimization).
+- Happens-before is not just reordering of actions in 'time' but also a guarantee of ordering of read and write to memory .
+  - Two threads performing write and read to memory can be consistent to each other actions in terms of clock time but might not see each others changes consistently (Memory Consistency Errors) **unless they have happens-before relationship.**
+
+### How to establish happens-before relation?
+
+- Single thread rule: Each action in a single thread happens-before every action in that thread that comes later in the program order.
+- Monitor lock rule: An unlock on a monitor lock (**exiting synchronized method/block**) happens-before every subsequent **acquiring on the same monitor lock.** (Another person gets same lock, enters see the latest value)
+- Volatile variable rule: A write to a volatile field happens-before **every subsequent read of that same field.** Writes and reads of volatile fields have similar memory consistency effects as entering and exiting monitors (synchronized block around reads and writes), but without actually aquiring monitors/locks. (threads always see latest value since read from main memory)
+- Thread start rule: thread.start() happended before all statements in thread.run()
+- Thread join rule: finishing of join() method heappended before all statements after join()
+- Transitivity: If A happens-before B, and B happens-before C, then A happens-before C.
+
+### Java Memory Model
+
+**Why JMM?**
+
+1. Variable Visiblity Problem
+2. Code Reordering
+3. Sequential Consistency will ruin performance (but java selectively offers inside synachroied area)
+
+### So what is Java Memory Model?
+
+According to Java Memory Model specs:
+
+A program must be correctly synchronized to avoid reordering and visibility problems.
+
+A program is correctly synchronized if:
+
+Actions are ordered by happens-before relationship.
+Has no data races. Data races can be avoided by using Intrinsic Locks.
+
+### Summary
+
+As long as you follow the JMM rules in Java (e.g., using synchronized or volatile correctly), the JVM and JIT compiler take on the responsibility of translating those rules into the specific assembly code and memory barriers required by whatever CPU your application happens to run on. You focus on high-level Java constructs, while the JVM handles hardware complexity.
+
+## Thread Coordination
+
+### `obj.wait()` `obj.notify()` `obj.notifyAll()`
+
+- when thread wants to go waiting state and must be called inside synchronised block.
+- `wait()` release lock unlike `sleep(ms)`, `join()`, `yield()` and thread waits until `notify()` called on same object.
+- `notify()` and `notifyAll()` : wakes thread/all threads but threads should acquire locks.
+
+![Alt Text](./assests/threads/notifyall.png)
+
+```java
+synchronized (shared) {
+    while (!condition) {
+        shared.wait(); // releases lock, waits
+    }
+    // do work when condition is true
+}
+
+synchronized (shared) {
+    condition = true;
+    shared.notify(); // wake up one waiting thread
+}
+```
+
+### Spurious Wakeups
+
+- threads sometimes wakeup without beign notified (Rate but present in Java Specs).
+
+```java
+// Incorrect: using if
+synchronized (queue) {
+    if (queue.isEmpty()) {
+        queue.wait(); // wakes up randomly
+    }
+    queue.remove(); // may throw NoSuchElementException
+}
+
+// Correct Way with while
+
+// Correct: using while
+synchronized (queue) {
+  // Even threads wakeup, we will check and condition again put in wait state(whether wakeup from notify() or spurious wakeup)
+    while (queue.isEmpty()) {
+        queue.wait();
+    }
+    queue.remove(); // safe now
+}
+```
+
+### `obj.sleep()`
+
+- stop working for sometime : Running -> Timed Waiting -> Runnable(Ready Again)
+
+### `sleep()` vs `wait()`
+
+| Feature           | `Thread.sleep()`                                        | `Object.wait()`                                                                                       |
+| :---------------- | :------------------------------------------------------ | :---------------------------------------------------------------------------------------------------- |
+| **Method Type**   | Static method of `Thread` class                         | Instance method of `Object` class                                                                     |
+| **Lock Handling** | Doesn't release lock when inside a `synchronized` block | Releases lock, allowing other threads to acquire it                                                   |
+| **Waking Up**     | Wakes up automatically after time or if interrupted     | Needs `notify()` or `notifyAll()` from another thread using this same object now (or spurious wakeup) |
+| **Use Case**      | Good for pauses, retry scheduling, and throttling tasks | Good for inter-thread communication                                                                   |
+
+## Thread Interruption
+
+- asaasdasdasdsad
+
+```java
+class WorkerThread extends Thread {
+    public void run() {
+        while (!isInterrupted()) { // Case 2: Checking the flag in a running loop
+            try {
+                System.out.println("Working...");
+                Thread.sleep(2000); // Case 1: Thread goes to sleep
+            } catch (InterruptedException e) {
+                // Catching InterruptedException clears the flag and lets us exit gracefully
+                System.out.println("Interrupted while sleeping! Cleaning up and exiting...");
+                break;
+            }
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        WorkerThread worker = new WorkerThread();
+        worker.start();
+
+        Thread.sleep(1000); // Let worker start
+        worker.interrupt(); // Sends interrupt signal (sets the interrupted flag)
+    }
+}
+```
+
+**How it works:**
+
+1. interrupt() sets the internal boolean flag on worker to true.
+
+2. Case 1 (Sleeping/Waiting): Because the thread is in Thread.sleep(2000), Java immediately wakes it up and throws InterruptedException.
+
+3. Case 2 (Running): If it were actively processing work instead of sleeping, while (!isInterrupted()) checks the flag manually to stop execution smoothly. |
+
+## Thread Join (Wait for another thread)
+
+### `obj.join()`
+
+```java
+public class JoinInterruptExample {
+    public static void main(String[] args) {
+
+        // Thread B: Long-running task
+        Thread worker = new Thread(() -> {
+            try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+        });
+
+        // get reference on current thread
+        Thread mainThread = Thread.currentThread();
+
+        // Interrupt main thread after 1 second using external thread
+        new Thread(() -> {
+            try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+            mainThread.interrupt();
+        }).start();
+
+        worker.start();
+
+        try {
+            worker.join(); // Main thread blocks here until worker finishes (run method in Thread B) OR mainThread is interrupted
+        } catch (InterruptedException e) {
+            System.out.println("Main thread interrupted while waiting in join()!");
+        }
+    }
+}
+```
+
+## Thread Yield (Giveup CPU for another thread)
+
+### `obj.yield()`
+
+```java
+public class YieldExample {
+    public static void main(String[] args) {
+        Runnable task = () -> {
+            for (int i = 1; i <= 3; i++) {
+                System.out.println(Thread.currentThread().getName() + " - Count: " + i);
+
+                // Pause current thread execution to give other threads a turn
+                if ("Thread-0".equals(Thread.currentThread().getName())) {
+                  //By targeting Thread-0 specifically, it forces only one thread to pause, making it obvious when Thread-1 jumps ahead in the console logs.
+                    Thread.yield();
+                }
+            }
+        };
+        Thread t1 = new Thread(task, "Thread-0");
+        Thread t2 = new Thread(task, "Thread-1");
+
+        t1.start();
+        t2.start();
+    }
+}
+```
+
 ## Concurrency Problems
+
+### Deadlock
+
+**Coffman's Conditions**
+
+### Stravation
+
+### Livelock
+
+### ThreadSafe
+
+### ThreadLocal
 
 ## Java Locks
 
