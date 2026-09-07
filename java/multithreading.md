@@ -17,6 +17,9 @@
     - [Thread Lifecyle \& States](#thread-lifecyle--states)
   - [Thread Priority](#thread-priority)
   - [Daemon Thread](#daemon-thread)
+  - [Thread Misc](#thread-misc)
+    - [ThreadSafe](#threadsafe)
+    - [ThreadLocal (Variables)](#threadlocal-variables)
   - [Synchronization \& Locks](#synchronization--locks)
     - [Race Condition](#race-condition)
     - [`synchronized` Keyword](#synchronized-keyword)
@@ -46,9 +49,8 @@
     - [Deadlock](#deadlock)
     - [Stravation](#stravation)
     - [Livelock](#livelock)
-    - [ThreadSafe](#threadsafe)
-    - [ThreadLocal](#threadlocal)
   - [Java Locks](#java-locks)
+    - [ReentrantLock](#reentrantlock)
   - [Synchronization Utilities](#synchronization-utilities)
   - [Atomic \& Lock-Free Programming](#atomic--lock-free-programming)
   - [Callable \& Future](#callable--future)
@@ -220,6 +222,45 @@ t.start();
 - backgroung helper thread for user threads. E.g. Garbage Collector is Daemon thread.
 - When all user threads finish, JVM will exist even if daemon thread are still running.
 - `t.setDaemon(true)` : should be set before calling start()
+
+## Thread Misc
+
+### ThreadSafe
+
+- Even multiple threads execute at same time, there should be no corruption, inconsistent, breaking logic.
+- Making thread safety = synchronized
+- Thread safety affects performance since synchronisation add overhead so developer often use other mechanism like `volatile`, `AtomicInteger`, `Lock` package for effiency instead of traditional synchronisation.
+
+### ThreadLocal (Variables)
+
+- **Each thread to have own copy of variables** isolated from other threads.
+- Special type of variable where each thread see seperate own values.
+- Use When : UserSession/RequestId/Thread Specici value/Avoiding sharing state across threads in framework.
+- Always clear ThreadLocal since it might cause memory leak in long running process. Because the thread stays alive inside the pool indefinitely, any data left inside its ThreadLocalMap will never be garbage collected, even if the request or task finished long ago.
+
+```java
+public class ThreadLocalCleanupExample {
+
+    private static final ThreadLocal<String> userContext = new ThreadLocal<>();
+
+    public void processRequest(String userId) {
+        try {
+            // Set context for the current thread
+            userContext.set(userId);
+
+            // Perform business logic
+            doWork();
+        } finally {
+            // ALWAYS remove to prevent memory leaks in thread pools!
+            userContext.remove();
+        }
+    }
+
+    private void doWork() {
+        System.out.println("Processing work for user: " + userContext.get());
+    }
+}
+```
 
 ## Synchronization & Locks
 
@@ -592,17 +633,43 @@ Since all 4 conditions must exist together for a deadlock to happen, you only ne
 
 ### Stravation
 
+- Higher priorities threads always get more CPU and lower priority strave which are ready to run.
+
 ### Livelock
 
-### ThreadSafe
+- Recursive situation when 2 threafs tries to acquire smae resource and keep giving chance to each other without doing anything meaningfull.
 
-### ThreadLocal
+![Alt Text](./assests/threads/concurrentproblems.png)
 
 ## Java Locks
 
+### ReentrantLock
+
+- solves synchronized limitations and gives more control over locking and multiple waitset.
+- ReentrantLock is Reentrant so we can acquire multiple times without deadloack as JVM hold counter and increments/decrements
+- Reentrant has multiple waitset with help of `Condition` so we can wakeup the respective thread.
+- [ReentrantLock](#reentrantlock)
+- [ReentrantReadWriteLock](#reentrantreadwritelock)
+- [Condition](#condition-1)
+- [Lock vs synchronized](#lock-vs-synchronized)
+
 ## Synchronization Utilities
 
+- [Semaphore](#semaphore)
+- [CountDownLatch](#countdownlatch)
+- [CyclicBarrier](#cyclicbarrier)
+- [Phaser](#phaser)
+- [Exchanger](#exchanger)
+
 ## Atomic & Lock-Free Programming
+
+- [AtomicInteger](#atomicinteger)
+- [AtomicLong](#atomiclong)
+- [AtomicReference](#atomicreference)
+- [CAS](#cas)
+- [compareAndSet()](#compareandset)
+- [volatile + CAS](#volatile--cas)
+- [ABA Problem](#aba-problem)
 
 ## Callable & Future
 
@@ -614,3 +681,4 @@ Since all 4 conditions must exist together for a deadlock to happen, you only ne
 - <https://web.goodnotes.com/s/NGiA9uSx4H4YE7FArjqVvN>
 - physical notes
   <https://www.logicbig.com/tutorials/core-java-tutorial/java-multi-threading/happens-before.html>
+- <https://www.javamex.com/tutorials/threads/thread_safety.shtml>
